@@ -269,8 +269,10 @@ class BenchJS {
           writeFileTask.finish();
           try {
             process.stdout.clearLine();
-          } catch (error) {}
-          process.stdout.cursorTo(0);
+            process.stdout.cursorTo(0);
+          } catch (error) {
+            console.log();
+          }
         }
         console.log("===== BENCHMARK FINISHED =====");
         t.tasks.forEach((task) => {
