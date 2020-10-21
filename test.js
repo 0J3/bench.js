@@ -5,7 +5,7 @@
  * @author 0J3
  */
 
-const benchjs = new (require("."))();
+const benchjs = new (require("."))(true);
 
 // Create Tasks
 const task1 = benchjs.createTask("Sample Task 1"); // create task
@@ -23,6 +23,6 @@ task1.finish();
 task2.finish();
 task3.finish();
 task4.finishWithError(new Error("bean"));
-task5.finishWithError(new Error("bean"));
+task5.error(new Error("bean"));
 
 benchjs.finish(); // Finish

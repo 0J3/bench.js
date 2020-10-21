@@ -180,7 +180,7 @@ class Task {
    * @description Alias to finishWithError
    */
   error(...a) {
-    this.finishWithError(a);
+    return this.finishWithError(a);
   }
 }
 
@@ -199,7 +199,7 @@ class BenchJS {
   tasks = [];
 
   constructor(benchmarkEnabled = true) {
-    this.benchmarkMode = benchmarkEnabled; // Unused - Might be implemented in the future
+    this.benchmarkMode = benchmarkEnabled;
 
     this.createTask();
 
@@ -222,7 +222,7 @@ class BenchJS {
       name = "App";
     }
 
-    const task = new Task(name, this.tasks.length, this);
+    const task = new this.TaskClass(name, this.tasks.length, this);
     if (task.name == "Node") {
       task.start = 0;
     }
@@ -257,6 +257,9 @@ class BenchJS {
    * @argument {number} ecode The error code
    */
   finish(ecode) {
+    if (this.benchmarkMode == false) {
+      return;
+    }
     const t = this;
     let writeFileTask;
     function final() {
@@ -292,10 +295,10 @@ class BenchJS {
             )}`
           );
         });
-      }
-      console.log("==============================");
+        console.log("==============================");
 
-      process.exit(ecode || 0);
+        process.exit(ecode || 0);
+      }
     }
     if (this.writingToFile == true) {
       process.stdout.write("Waiting for files to be written to...");
@@ -306,6 +309,16 @@ class BenchJS {
       final();
     }
   }
+
+  /**
+   * @name TaskClass
+   * @description The class used for tasks in this module
+   *
+   * @readonly
+   * @private
+   */
+  TaskClass = Task;
 }
 
 module.exports = BenchJS;
+module.exports.Task = Task;
