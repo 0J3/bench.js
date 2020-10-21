@@ -61,7 +61,9 @@ The `0` is optional, and specifies the exit code.
 When running finish, bench.js will exit your program, once its done outputting the benchmark data, so it is important that you have nothing else running after this.
 
 ## Bench.JS Sample Output
+
 Taken from the [Tests File](./test.js)
+
 ```
 ===== BENCHMARK FINISHED =====
 Task Node (#0) took 0.10054s
@@ -74,6 +76,8 @@ Task Sample Task 5 (#6) DNF
 Task Finish writing to error files (#7) took 0.0146s
 ==============================
 ```
+
+(add some colour to the above to make it accurate)
 
 ## Extending Bench.JS
 
