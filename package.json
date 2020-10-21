@@ -1,0 +1,14 @@
+{
+  "name": "bench.js",
+  "version": "1.0.0",
+  "description": "A benchmarking tool, created for hen.js",
+  "main": "lib.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "license": "LGPL-3.0-or-later",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "errmsgs": "^1.0.4"
+  }
+}

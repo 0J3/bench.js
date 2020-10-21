@@ -1,0 +1,4 @@
+errors/*.error.log
+errors/*.err
+errors/*.log
+errors/*.elog
