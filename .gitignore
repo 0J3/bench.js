@@ -2,3 +2,4 @@ errors/*.error.log
 errors/*.err
 errors/*.log
 errors/*.elog
+node_modules
