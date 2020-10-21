@@ -56,7 +56,7 @@ At the end of your code, you must add
 benchjs.finish(0);
 ```
 
-The 0 is optional, and specifies the exit code.
+The `0` is optional, and specifies the exit code.
 
 When running finish, bench.js will exit your program, once its done outputting the benchmark data, so it is important that you have nothing else running after this.
 

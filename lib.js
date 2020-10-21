@@ -79,7 +79,7 @@ class Task {
    *
    * @public
    */
-  name = "No Specified Name";
+  name = "No Name Specified";
 
   /**
    * @name constructor
