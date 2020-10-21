@@ -1,7 +1,11 @@
 {
   "name": "bench.js",
   "version": "1.0.0",
-  "description": "A benchmarking tool, created for hen.js",
+  "description": "A generic Benchmarking tool",
+  "author": {
+    "name": "0J3",
+    "email": "bench.js@wafflepowered.com"
+  },
   "main": "lib.js",
   "scripts": {
     "test": "node test.js"
@@ -10,5 +14,11 @@
   "dependencies": {
     "chalk": "^4.1.0",
     "errmsgs": "^1.0.4"
-  }
+  },
+  "keywords": [
+    "benchmark",
+    "bench.js",
+    "testing",
+    "performance"
+  ]
 }

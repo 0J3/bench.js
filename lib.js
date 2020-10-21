@@ -1,6 +1,6 @@
 /**
  * @name lib.js (Bench.JS)
- * @description Benchmarking tool, designed for Hen.JS
+ * @description A generic Benchmarking tool
  *
  * @author 0J3
  */
@@ -13,6 +13,13 @@ const { performance } = require("perf_hooks"),
 
 class Task {
   /**
+   * @name parent
+   * @description This task's parent benchmark
+   *
+   * @class BenchJS
+   */
+  parent = null;
+  /**
    * @name id
    * @description A unique identifier
    *
@@ -20,17 +27,17 @@ class Task {
    *
    * @public
    */
-  start = 0;
+  id = 0;
 
   /**
    * @name start
-   * @description Start Time, -1 when not started
+   * @description Start Time, Infinity when not started
    *
    * @type Integer
    *
    * @public
    */
-  start = -1;
+  start = Infinity;
 
   /**
    * @name end
@@ -85,14 +92,17 @@ class Task {
    *
    * @public @constructor @constant
    */
-  constructor(taskName, id) {
+  constructor(taskName, id, parent) {
     this.name = taskName;
     this.id = id;
+    this.parent = parent;
   }
 
   begin() {
-    this.start = performance.now();
-    this.finished = false;
+    if (this.start == Infinity) {
+      this.start = performance.now();
+      this.finished = false;
+    }
   }
   finish() {
     this.finished = true;
@@ -114,18 +124,19 @@ class Task {
    * @name finishWithError
    * @description Finish, with an error
    *
-   * @usage Task.finishWithError(<Error | Name,[Code]>)
+   * @usage Task.finishWithError(<Error>)
    *
    * @public
    */
-  finishWithError(throwOrName, exitCode) {
-    if (throwOrName instanceof Error) {
-      let e = throwOrName;
+  finishWithError(e) {
+    if (e instanceof Error) {
+      this.parent.writingToFile = true;
+
       this.finished = true;
 
       const d = startDate;
 
-      let errfile = `${d.toDateString()} at ${d.getHours()}.${d.getMinutes()}.${d.getSeconds()}`;
+      let errfile = `${d.getDate()}.${d.getMonth()}.${d.getFullYear()}-${d.getHours()}.${d.getMinutes()}.${d.getSeconds()}`;
 
       errfile = errfile.split(" ").join("-");
 
@@ -133,20 +144,33 @@ class Task {
         fs.mkdirSync(`${__dirname}/errors/${errfile}`);
       }
 
-      errfile = `${errfile}/${this.name}`;
+      errfile = `${errfile}/${this.name}-id-${this.id}`;
 
-      errfile = `${errfile}.err.log`;
+      errfile = `${errfile}.err.yml`;
 
       errfile = `${__dirname}/errors/${errfile}`;
 
-      (async () => {
-        let finalerrmsg = `An error has occured while running task ${this.name} (#${this.id}):\n${e}`;
-        finalerrmsg = await errmsgs.error(finalerrmsg);
+      errfile = errfile.split(" ").join("-");
 
-        fs.writeFileSync(errfile, finalerrmsg);
-      })();
+      console.log(errfile);
 
-      this.timeTaken = `DNF | Error (See ${errfile})`;
+      let finalerrmsg = `An error has occured while running task ${this.name} (#${this.id}):\n${e}`;
+      errMsgGen
+        .error(finalerrmsg)
+        .then((finalerrmsg) => {
+          fs.writeFileSync(errfile, finalerrmsg);
+          this.timeTaken = `DNF | Error (See ${errfile})`;
+          this.parent.writingToFile = false;
+        })
+        .catch((e) => {
+          this.timeTaken = `DNF | Error | Failed to write to file`;
+          console.error(e);
+          this.parent.writingToFile = false;
+        });
+    } else {
+      this.finishWithError(
+        new Error("Called finishedwitherror with " + e + " (TYPE != ERROR)")
+      );
     }
   }
 
@@ -161,6 +185,16 @@ class Task {
 }
 
 class BenchJS {
+  /**
+   * @name writingToFile
+   * @description If false, exits instantly (in the finish section). If true, waits til it is false
+   *
+   * @type Boolean
+   *
+   * @public
+   */
+  writingToFile = false;
+
   benchmarkMode = true;
   tasks = [];
 
@@ -188,9 +222,9 @@ class BenchJS {
       name = "App";
     }
 
-    const task = new Task(name, this.tasks.length);
+    const task = new Task(name, this.tasks.length, this);
     if (task.name == "Node") {
-      task.begin = 0;
+      task.start = 0;
     }
 
     this.tasks[this.tasks.length] = task;
@@ -209,7 +243,7 @@ class BenchJS {
    * @returns Task
    */
   beginTask(name = "Unknown Task") {
-    const task = new Task(name);
+    const task = this.createTask(name);
 
     task.begin();
 
@@ -223,30 +257,50 @@ class BenchJS {
    * @argument {number} ecode The error code
    */
   finish(ecode) {
-    this.tasks[0].finishWithError(new Error("bean"));
-    this.tasks[1].finish();
+    const t = this;
+    let writeFileTask;
+    function final() {
+      if (t.writingToFile == true) {
+        setTimeout(final, 10);
+      } else {
+        t.tasks[0].finish();
+        t.tasks[1].finish();
+        if (writeFileTask) {
+          writeFileTask.finish();
+          process.stdout.clearLine();
+          process.stdout.cursorTo(0);
+        }
+        console.log("===== BENCHMARK FINISHED =====");
+        t.tasks.forEach((task) => {
+          console.log(
+            `Task ${chalk.redBright.bold(task.name)} (${chalk.green(
+              `#${task.id}`
+            )}) ${chalk.blue.bold(
+              `${
+                task.timeTaken == -1
+                  ? "DNF"
+                  : `${
+                      typeof task.timeTaken == typeof "string"
+                        ? task.timeTaken
+                        : `took ${task.timeTaken}s`
+                    }`
+              }`
+            )}`
+          );
+        });
+      }
+      console.log("==============================");
 
-    console.log("===== BENCHMARK FINISHED =====");
-    this.tasks.forEach((task) => {
-      console.log(
-        `Task ${chalk.redBright.bold(task.name)} (${chalk.green(
-          `#${task.id}`
-        )}) ${chalk.blue.bold(
-          `${
-            task.timeTaken == -1
-              ? "DNF"
-              : `${
-                  typeof task.timeTaken == typeof "string"
-                    ? task.timeTaken
-                    : `took ${task.timeTaken}s`
-                }`
-          }`
-        )}`
-      );
-    });
-    console.log("==============================");
-
-    process.exit(ecode || 0);
+      process.exit(ecode || 0);
+    }
+    if (this.writingToFile == true) {
+      process.stdout.write("Waiting for files to be written to...");
+      writeFileTask = this.createTask("Finish writing to error files");
+      writeFileTask.begin();
+      setTimeout(final, 10);
+    } else {
+      final();
+    }
   }
 }
 

@@ -2,4 +2,8 @@ errors/*.error.log
 errors/*.err
 errors/*.log
 errors/*.elog
+*.log
+.log
+*.err.yml
+.err.yml
 node_modules
