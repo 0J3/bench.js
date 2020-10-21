@@ -13,7 +13,7 @@ yarn add @0j3/bench-js
 To use bench.js, start by initializing it:
 
 ```js
-const benchjs = new (require("bench-js"))(true); // The first argument in the constructor of bench.js (the "true") specifies, if benchjs.finish (see below) should output anything
+const benchjs = new (require("@0j3/bench-js"))(true); // The first argument in the constructor of bench.js (the "true") specifies, if benchjs.finish (see below) should output anything
 ```
 
 Then, start by creating a "Task" where your program does something you want to benchmark (you can have infinite tasks, and you should make anything that takes lots of time have a task), by using
@@ -84,7 +84,7 @@ Task Finish writing to error files (#7) took 0.0146s
 If you want to extend bench.js, use
 
 ```js
-const BenchOriginal = require("benchjs");
+const BenchOriginal = require("@0j3/bench-js");
 class Bench extends BenchOriginal {
   constructor(outputResults = true) {
     super.constructor(outputResults); // call original constructor
@@ -99,7 +99,7 @@ and add whatever you want from there.
 If you want to extend the task class aswell, use
 
 ```js
-const BenchOriginal = require("benchjs");
+const BenchOriginal = require("@0j3/bench-js");
 class Task extends BenchOriginal.Task {
   constructor(taskName, id, parent) {
     super.constructor(taskName, id, parent); // call original constructor
